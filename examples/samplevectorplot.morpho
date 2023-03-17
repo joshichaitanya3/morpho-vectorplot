@@ -1,0 +1,9 @@
+import vectorplot 
+
+var mesh = Mesh("disk.mesh")
+
+var f = Field(mesh, fn(x,y,z) Matrix([y, -x, 0]))
+
+var g = plotvectorfield(f, colorby="x", noarrows=false, dl=0.1, showmesh=true, colormap=InfernoMap(), scalebar=ScaleBar(posn=[1.2,0,0]))
+
+Show(g)
