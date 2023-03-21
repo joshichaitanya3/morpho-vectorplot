@@ -63,7 +63,7 @@ fn plotvectorfield(field,
         if (noarrows) out.display(Cylinder(x-field[i]*dl, x+field[i]*dl, aspectratio=0.3, color=col, filter=filter, transmit=transmit))
         else out.display(Arrow(x-field[i]*dl, x+field[i]*dl, aspectratio=0.3, color=col, filter=filter, transmit=transmit))
     }
-    if (plotmesh) out += plotmesh(mesh, grade=1, filter=filter, transmit=transmit)
+    if (showmesh) out += plotmesh(mesh, grade=1, filter=filter, transmit=transmit)
 
     if (isobject(scalebar)) {
     var s = scalebar
