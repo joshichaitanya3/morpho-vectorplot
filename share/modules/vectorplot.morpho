@@ -17,6 +17,7 @@ fn plotvectorfield(field,
                    grade=nil, 
                    noarrows=false, 
                    dl=1,
+                   aspectratio=0.3,
                    colorby=nil,
                    colormap=nil, 
                    scale=true, 
@@ -39,6 +40,15 @@ fn plotvectorfield(field,
     else if (colorby=="z") {
         colorfield = field.op(fn (x) x[2])
     }
+    else if (iscallable(colorby)) {
+        colorfield = field.op(colorby)
+    }
+    else if (islist(colorby)) {
+        if (!iscallable(colorby[0])) Error("VectorPlotArgs","List requires first element to be a callable function").throw()
+        var f = colorby[0]
+        if (colorby.count()==1) colorfield = field.op(f)
+        else  colorfield = field.op(f, colorby[1])
+    }
     else if (!isnil(colorby)) {
         Error("InvalidColorby", "The optional `colorby` argument can only be set to `norm`, `x`, `y` or `z`.").throw()
     }
@@ -59,9 +69,9 @@ fn plotvectorfield(field,
         var val = colorfield[i]
         if (scale) val=(val-bnd[0])*sc
         var col = Matrix(cm.rgb(val))
-        if (field[i].norm()==0) continue
-        if (noarrows) out.display(Cylinder(x-field[i]*dl, x+field[i]*dl, aspectratio=0.3, color=col, filter=filter, transmit=transmit))
-        else out.display(Arrow(x-field[i]*dl, x+field[i]*dl, aspectratio=0.3, color=col, filter=filter, transmit=transmit))
+        if (field[i].norm()<1e-12) continue
+        if (noarrows) out.display(Cylinder(x-field[i]*dl, x+field[i]*dl, aspectratio=aspectratio, color=col, filter=filter, transmit=transmit))
+        else out.display(Arrow(x-field[i]*dl, x+field[i]*dl, aspectratio=aspectratio, color=col, filter=filter, transmit=transmit))
     }
     if (showmesh) out += plotmesh(mesh, grade=1, filter=filter, transmit=transmit)
 

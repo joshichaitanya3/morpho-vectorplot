@@ -22,6 +22,7 @@ Visualizes a vector `Field` object:
 Plotfield accepts a number of optional arguments to control what is displayed:
 
 * `dl` - Sets the size of the vectors. Default is `1`.
+* `aspectratio` - Sets the aspect ratio of the arrows / cylinders representing the field. Default is `0.3`.
 * `noarrows` - A Boolean variable to indicate whether you want the arrowheads to be drawn. Default is `false`. This can be set to `true` to visualize dyadic / nematic fields that have a head/tail symmetry.
 * `colorby` - Argument to control the color of the arrows. See below
 * `scalebar` - A `Scalebar` object to use. 
