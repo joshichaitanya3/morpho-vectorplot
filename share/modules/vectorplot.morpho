@@ -14,17 +14,17 @@ import plot
  * @param[in] style - style to use
  * @param[in] scale - whether or not to scale values */
 fn plotvectorfield(field,
-                   grade=nil, 
-                   noarrows=false, 
                    dl=1,
                    aspectratio=0.3,
-                   colorby=nil,
+                   noarrows=false,
+                   sparsity=nil, 
+                   showmesh=true,
                    colormap=nil, 
                    scale=true, 
-                   filter=nil, 
-                   transmit=nil, 
                    scalebar=nil,
-                   showmesh=true) {
+                   colorby=nil,
+                   filter=nil, 
+                   transmit=nil) {
     
     var mesh = field.mesh()
     var colorfield = Field(mesh, 0.0)
@@ -53,6 +53,35 @@ fn plotvectorfield(field,
         Error("InvalidColorby", "The optional `colorby` argument can only be set to `norm`, `x`, `y` or `z`.").throw()
     }
 
+    var densityField = nil
+    var maxg = mesh.maxgrade()
+    if (!isnil(sparsity) and maxg<1) {
+        // We haven't implemented a sparsification scheme if only the vertices are present, so warn about it if a user tries to use it, and don't do anything
+        Error("CannotSparsify", "The mesh must have a grade of at least 1 to use the `sparsity` argument for now.").warning()
+    }
+
+    else if (!isnil(sparsity)) {
+        if (!isnumber(sparsity)) Error("InvalidSparsity", "The optional `sparsity` argument must be a number.").throw()
+        if (sparsity<0 || sparsity>1) Error("InvalidSparsityVal", "The optional `sparsity` argument must be between 0 and 1.").throw()
+
+        var elementFunctional = nil
+        if (maxg==1) elementFunctional = Length()
+        else if (maxg==2) elementFunctional = Area()
+        else if (maxg==3) elementFunctional = Volume()
+        var vals = elementFunctional.integrand(mesh)
+        densityField = Field(mesh, 0, grade=0)
+        var avgDensity = vals.sum()/vals.count()
+        var conn = mesh.connectivitymatrix(maxg,0)
+        for (i in 0...mesh.count()) {
+            var sum = 0
+            var ids = conn.rowindices(i)
+            for (id in ids) {
+                sum += vals[0, id]
+            }
+            densityField[i] = (sum/ids.count() / avgDensity)^(maxg/2) // The maxg/2 is a heuristic to make the density field more uniform. It's not perfect, but it's a start.
+            
+        }
+    }
     var cm=colormap
     if (cm==nil) cm = ViridisMap()    // Default color map
 
@@ -65,6 +94,9 @@ fn plotvectorfield(field,
     var nv = mesh.count()
     var out = Graphics()
     for (i in 0...nv) {
+        if (!isnil(sparsity)) {
+            if (random() > sparsity * densityField[i]) continue
+        }
         var x = v.column(i)
         var val = colorfield[i]
         if (scale) val=(val-bnd[0])*sc

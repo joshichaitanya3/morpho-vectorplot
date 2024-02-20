@@ -1,0 +1,14 @@
+// Example that uses the `sparsity` option to reduce the number of arrows in the vector plot in the case of a dense mesh.
+import vectorplot 
+import meshtools 
+
+// Create a circular mesh with a non-uniform density of points to test the sparsity option
+var mesh = LineMesh(fn(t) [cos(2*Pi*t*t), sin(2*Pi*t*t), 0], 0...1:0.02, closed=true)
+
+var f = Field(mesh, fn(x,y,z) Matrix([y, -x, 0]))
+
+// Plot the vector field with a sparsity of 0.3
+// Also showcasing the combined use of the `dl` and `aspectratio` options to adjust the size of the arrows
+var g = plotvectorfield(f, colorby="x", noarrows=false, dl=0.1, aspectratio=0.2, showmesh=true, colormap=InfernoMap(), scalebar=ScaleBar(posn=[1.2,0,0]), sparsity=0.5)
+
+Show(g)
